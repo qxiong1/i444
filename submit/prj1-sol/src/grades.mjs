@@ -59,12 +59,26 @@ export default class Grades {
   query(courseId, options={}) {
     const { projectionSpec=[], selectionSpec={} } = options;
     //@TODO
-    return { [courseId]: [] } //@TODO: replace
+    console.log(courseId);
+	  
+	  
+	  console.log(options);
+	  console.log(makeIdTypes(courseId))
+	  console.log(Grades.courseId)
+	  //console.log(this._grades);
+	  //console.log(this.precomputed)
+	  return { [courseId]: [] } //@TODO: replace
   }
 
   //@TODO: add code as required
   
 }
+function _precompute(courseId)
+{
+	return { [courseId]: []}
+}
+
+
 
 //@TODO: add code as required
 

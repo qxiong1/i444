@@ -1,0 +1,93 @@
+# usage message
+$ ./index.mjs 
+index.mjs [--out=text|js|json|json2] DB_URL CMD ...
+
+  command can be one of:
+     add COURSE_ID EMAIL_ID,COL_ID,VALUE...
+       Update COURSE_ID with triples (no space within each triple).
+     clear
+       Clear out all courses.
+     help:
+       Print this message.
+     import COURSE_ID GRADES_JSON_PATH
+       Set raw grades for COURSE_ID to data read from GRADES_JSON_PATH.
+     query COURSE_ID [PROJECTION_SPEC|SELECTION_SPEC]...
+       Return grades table (including stats) for COURSE_ID.
+       Filter by COL_ID=VALUE SELECTION_SPEC and project by
+       COL_ID PROJECTION_SPEC
+     raw COURSE_ID
+       Return raw grades (no stats) for COURSE_ID.
+
+# add data to db
+$ ./index.mjs mongodb://localhost:27017/grades import \
+     cs544 ~/cs544/data/cs544-grades-10.json 
+
+# validation failure for query with projection;
+# note necessary to quote '$ids' to protect from shell
+$ ./index.mjs mongodb://localhost:27017/grades query cs544 \
+     prj1 prj2 prj3 prj4 prj5 '$pStats' '$total' '$grade'
+BAD_ID: unknown id "$pStats"
+
+
+$ ./index.mjs mongodb://localhost:27017/grades query cs544 emailId prj1 prj2 prj3 prj4 prj5 '$pAvg' '$total' '$grade'
+emailId prj1 prj2 prj3 prj4 prj5 $pAvg $total $grade
+dwille    89   96   92   96   92    94   90.4 B+    
+xgee      86   79   86   84   85  85.3   77.5 B-    
+ecody          74   75   75         56     49 F     
+crudew    70   75                 36.3   29.3 F     
+skeene    86   81   79   81   83  82.8     77 B-    
+wgabre    85   89   90   89   85  88.3   84.9 B     
+ajohan         76        74       37.5   40.9 F     
+wdiebe    66   70   69        68  68.3   54.1 D     
+wdunn     93   92   95   95   97    95   95.3 A-    
+earmst    65             70   71  51.5   32.5 F     
+          80 81.3 83.7   83   83  69.5   63.1       
+          65   70   69   70   68  36.3   29.3       
+          93   96   95   96   97    95   95.3       
+           8    9    7    8    7    10     10       
+
+# update grades; we are adding in a new project prj6
+# no spaces allowed within comma-separated triples
+$ ./index.mjs mongodb://localhost:27017/grades add cs544 \
+     dwille,prj1,30 dwille,prj2,40 dwille,prj6,44
+
+# verify data changed
+$ ./index.mjs mongodb://localhost:27017/grades query cs544 \
+    emailId prj1 prj2 prj3 prj4 prj5 prj6 '$pAvg' '$total' '$grade'
+emailId prj1 prj2 prj3 prj4 prj5 prj6 $pAvg $total $grade
+dwille    30   40   92   96   92   44  72.8     83 B     
+xgee      86   79   86   84   85         84     77 B-    
+ecody          74   75   75            44.8   45.1 F     
+crudew    70   75                        29   26.7 F     
+skeene    86   81   79   81   83         82   76.7 C+    
+wgabre    85   89   90   89   85       87.6   84.6 B     
+ajohan         76        74              30   38.2 F     
+wdiebe    66   70   69        68       54.6   49.3 F     
+wdunn     93   92   95   95   97       94.4   95.1 A-    
+earmst    65             70   71       41.2   28.9 F     
+        72.6 75.1 83.7   83   83   44    62   60.5       
+          30   40   69   70   68   44    29   26.7       
+          93   92   95   96   97   44  94.4   95.1       
+           8    9    7    8    7    1    10     10       
+
+# retrieve raw data
+$ ./index.mjs mongodb://localhost:27017/grades raw cs544
+emailId section prj1 prj2 prj3 prj4 prj5 prj6 hw1 hw2 hw3 hw4 qz1 qz2 qz3 mid fin pap
+dwille  cs544     30   40   92   96   92   44  86  84  86  93  10  12  12  84  88   2
+xgee    cs444     86   79   86   84   85       79  73  71  68   8  10   8  69  74    
+ecody   cs544          74   75   75            57               6   8   8  60  63    
+crudew  cs544     70   75                              58           6          62    
+skeene  cs444     86   81   79   81   83       68  70  78  74   8   8  10  77  70    
+wgabre  cs544     85   89   90   89   85       87  85  82  80  10   8  10  79  87   2
+ajohan  cs444          76        74            59  62  60  62       4   6  57        
+wdiebe  cs444     66   70   69        68       56  45  57  49           4  55  50    
+wdunn   cs444     93   92   95   95   97       92  98  99  93  10  12  12  94  91    
+earmst  cs444     65             70   71       57  45  48               4
+
+# remove data for all courses
+$ ./index.mjs mongodb://localhost:27017/grades clear
+
+# verify data gone
+$ ./index.mjs mongodb://localhost:27017/grades raw cs544
+BAD_VAL: unknown course "cs544"
+$ 

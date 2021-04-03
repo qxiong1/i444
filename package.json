@@ -1,0 +1,18 @@
+{
+  "name": "prj2-sol",
+  "version": "1.0.0",
+  "description": "Name:\t\tXXX B-Number:\tXXX Email:\t\tXXX",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "course-grades": "file:../../../lib/course-grades",
+    "courses-info": "file:../../../lib/courses-info",
+    "esm": "^3.2.25",
+    "mongodb": "^3.6.5"
+  }
+}
